@@ -1,4 +1,4 @@
-name: Build Super Secret Group APK
+name: Build MrAnatas9 App
 on: [push]
 
 jobs:
@@ -6,25 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Accept Android licenses
-      run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        yes | sdkmanager --licenses
-        
-    - name: Install Buildozer and dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip openjdk-11-jdk
-        pip3 install buildozer cython
-        
-    - name: Build APK with Buildozer
-      run: |
-        buildozer android debug
-        
+    - name: Download APK
+      run: wget -O MrAnatas9-app.apk "https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk"
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: super-secret-group
-        path: bin/*.apk
+        name: MrAnatas9-app
+        path: MrAnatas9-app.apk
