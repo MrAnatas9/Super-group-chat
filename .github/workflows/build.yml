@@ -3,32 +3,35 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # Старая версия Ubuntu
+    runs-on: ubuntu-latest  # Меняем на latest!
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install OLD Android SDK (no licenses needed)
+    - name: Setup Android SDK
       run: |
-        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-        unzip commandlinetools-linux-8512546_latest.zip
+        sudo apt update
+        sudo apt install -y wget unzip openjdk-11-jdk
+        
+        # Скачиваем Android Command Line Tools
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
         mkdir -p android-sdk/cmdline-tools/latest
         mv cmdline-tools/* android-sdk/cmdline-tools/latest/
+        
         export ANDROID_HOME=$PWD/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
         
-        # Старые версии без лицензий
-        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+        # Принимаем лицензии автоматически
+        yes | sdkmanager --licenses || true
+        sdkmanager "platform-tools" "build-tools;34.0.0"
         
     - name: Install Python and Buildozer
       run: |
-        sudo apt update
-        sudo apt install -y python3 python3-pip python3-venv
         pip3 install buildozer kivy cython
         
-    - name: Build with OLD SDK
+    - name: Build MrAnatas9 App
       run: |
         export ANDROID_HOME=$PWD/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
         buildozer android debug
         
     - name: Upload APK
