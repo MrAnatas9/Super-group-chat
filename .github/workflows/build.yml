@@ -7,16 +7,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Accept Android licenses
+      run: |
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        yes | sdkmanager --licenses
+        
     - name: Install Buildozer and dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip python3-dev autoconf automake libtool pkg-config zlib1g-dev
-        pip3 install buildozer cython virtualenv
+        sudo apt install -y python3-pip openjdk-11-jdk
+        pip3 install buildozer cython
         
     - name: Build APK with Buildozer
       run: |
         buildozer android debug
-        echo "✅ APK собран успешно!"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
