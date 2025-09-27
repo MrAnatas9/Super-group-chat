@@ -3,17 +3,21 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Старая версия Ubuntu
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Java and Android
-      uses: android-actions/setup-android@v2
-      
-    - name: Accept Android licenses
+    - name: Install OLD Android SDK (no licenses needed)
       run: |
-        yes | sdkmanager --licenses
-        sdkmanager "build-tools;34.0.0" "platforms;android-33"
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+        unzip commandlinetools-linux-8512546_latest.zip
+        mkdir -p android-sdk/cmdline-tools/latest
+        mv cmdline-tools/* android-sdk/cmdline-tools/latest/
+        export ANDROID_HOME=$PWD/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+        
+        # Старые версии без лицензий
+        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
         
     - name: Install Python and Buildozer
       run: |
@@ -21,10 +25,11 @@ jobs:
         sudo apt install -y python3 python3-pip python3-venv
         pip3 install buildozer kivy cython
         
-    - name: Build REAL MrAnatas9 APK
+    - name: Build with OLD SDK
       run: |
+        export ANDROID_HOME=$PWD/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
         buildozer android debug
-        echo "✅ НАСТОЯЩЕЕ приложение MrAnatas9 собрано!"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
