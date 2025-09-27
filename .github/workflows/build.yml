@@ -7,38 +7,35 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install basic tools
+    - name: Install Android SDK with auto-accept
       run: |
         sudo apt update
-        sudo apt install -y python3 python3-pip zip
+        sudo apt install -y wget unzip openjdk-11-jdk
+        
+        # Скачиваем Android SDK
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-9477386_latest.zip
+        mkdir -p android-sdk/cmdline-tools/latest
+        mv cmdline-tools/* android-sdk/cmdline-tools/latest/
+        
+        export ANDROID_HOME=$PWD/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+        
+        # АВТОМАТИЧЕСКОЕ СОГЛАШЕНИЕ С ЛИЦЕНЗИЯМИ
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-33"
     
-    - name: Create functional APK
+    - name: Install Python and Buildozer
       run: |
-        # Создаем минимальный НО РАБОЧИЙ APK
-        mkdir -p app_build/META-INF
-        mkdir -p app_build/res
-        
-        # Минимальный манифест
-        echo '<?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            package="org.mranatas9.app">
-            <application android:label="MrAnatas9 App">
-                <activity android:name=".MainActivity">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN"/>
-                        <category android:name="android.intent.category.LAUNCHER"/>
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>' > app_build/AndroidManifest.xml
-        
-        # Создаем APK
-        cd app_build
-        zip -r ../mr-anatas9-app.apk .
-        echo "✅ Minimal APK created"
+        pip3 install buildozer kivy cython
+    
+    - name: Build MrAnatas9 App
+      run: |
+        export ANDROID_HOME=$PWD/android-sdk
+        buildozer android debug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: mr-anatas9-app
-        path: mr-anatas9-app.apk
+        path: bin/*.apk
