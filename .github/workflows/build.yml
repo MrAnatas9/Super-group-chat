@@ -6,34 +6,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install Android SDK with auto-accept
-      run: |
-        sudo apt update
-        sudo apt install -y wget unzip openjdk-11-jdk
-        
-        # Скачиваем Android SDK
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip -q commandlinetools-linux-9477386_latest.zip
-        mkdir -p android-sdk/cmdline-tools/latest
-        mv cmdline-tools/* android-sdk/cmdline-tools/latest/
-        
-        export ANDROID_HOME=$PWD/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-        
-        # АВТОМАТИЧЕСКОЕ СОГЛАШЕНИЕ С ЛИЦЕНЗИЯМИ
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-33"
-    
+
+    - name: Setup Android
+      uses: android-actions/setup-android@v2
+      with:
+        licenses: true
+
     - name: Install Python and Buildozer
       run: |
         pip3 install buildozer kivy cython
-    
-    - name: Build MrAnatas9 App
+
+    - name: Build APK
       run: |
-        export ANDROID_HOME=$PWD/android-sdk
         buildozer android debug
-    
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
