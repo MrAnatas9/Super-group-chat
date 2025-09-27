@@ -1,4 +1,4 @@
-name: Build MrAnatas9 App
+name: Build MrAnatas9 Real App
 on: [push]
 
 jobs:
@@ -6,10 +6,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Download APK
-      run: wget -O MrAnatas9-app.apk "https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-aarch64.apk"
-    - name: Upload APK
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install Buildozer dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip autoconf automake libtool pkg-config zip unzip
+        pip3 install buildozer cython
+    
+    - name: Build Android APK
+      run: |
+        buildozer init
+        buildozer android debug
+        
+    - name: Upload Real APK
       uses: actions/upload-artifact@v4
       with:
-        name: MrAnatas9-app
-        path: MrAnatas9-app.apk
+        name: mr-anatas9-real-app
+        path: bin/*.apk
