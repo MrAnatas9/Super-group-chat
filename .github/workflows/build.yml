@@ -1,4 +1,4 @@
-name: Build MrAnatas9 Real App
+name: Build MrAnatas9 REAL App
 on: [push]
 
 jobs:
@@ -6,33 +6,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Create custom APK structure
+    
+    - name: Setup Java and Android
+      uses: android-actions/setup-android@v2
+      
+    - name: Accept Android licenses
       run: |
-        # Создаем базовую структуру APK
-        mkdir -p app_build/res/values
-        mkdir -p app_build/META-INF
+        yes | sdkmanager --licenses
+        sdkmanager "build-tools;34.0.0" "platforms;android-33"
         
-        # Файл с названием приложения
-        echo '<?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <string name="app_name">MrAnatas9 Secret Group</string>
-        </resources>' > app_build/res/values/strings.xml
+    - name: Install Python and Buildozer
+      run: |
+        sudo apt update
+        sudo apt install -y python3 python3-pip python3-venv
+        pip3 install buildozer kivy cython
         
-        # Манифест приложения
-        echo '<?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            package="org.mranatas9.secretgroup">
-            <application android:label="MrAnatas9 App">
-            </application>
-        </manifest>' > app_build/AndroidManifest.xml
-        
-        # Создаем APK
-        cd app_build
-        zip -r ../mr-anatas9-real-app.apk .
-        echo "✅ Кастомный APK создан!"
+    - name: Build REAL MrAnatas9 APK
+      run: |
+        buildozer android debug
+        echo "✅ НАСТОЯЩЕЕ приложение MrAnatas9 собрано!"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: mr-anatas9-real-app
-        path: mr-anatas9-real-app.apk
+        name: mr-anatas9-REAL-app
+        path: bin/*.apk
