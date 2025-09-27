@@ -6,16 +6,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Build with Kivy Android Action
-      uses: kivy/kivy-ios-android-build@v1
-      with:
-        platform: android
-        requirements: python3,kivy
-        buildozer-version: 1.5.0
-        
+    - name: Build APK with Python
+      run: |
+        sudo apt update
+        sudo apt install -y python3 python3-pip
+        pip3 install kivy buildozer
+        buildozer android debug
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: mr-anatas9-real-app
+        name: mr-anatas9-app
         path: bin/*.apk
