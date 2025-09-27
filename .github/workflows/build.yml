@@ -7,12 +7,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Force Android SDK setup
+    - name: Setup Android SDK with license fix
       run: |
         sudo apt update
         sudo apt install -y wget unzip openjdk-11-jdk
         
-        # Скачиваем SDK
+        # Download Android Command Line Tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q commandlinetools-linux-9477386_latest.zip
         mkdir -p android-sdk/cmdline-tools/latest
@@ -21,14 +21,15 @@ jobs:
         export ANDROID_HOME=$PWD/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
         
-        # ПРИНУДИТЕЛЬНОЕ ПРИНЯТИЕ ЛИЦЕНЗИЙ
+        # Create licenses manually BEFORE installing packages
         mkdir -p $ANDROID_HOME/licenses
         echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
         echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $ANDROID_HOME/licenses/android-sdk-license
         echo "84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
         
-        # Устанавливаем пакеты (лицензии уже приняты)
-        sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-33"
+        # Install Android packages (licenses are already accepted)
+        sdkmanager --verbose "platform-tools" "build-tools;34.0.0" "platforms;android-33"
+        echo "✅ Android SDK installed successfully"
 
     - name: Install Python and Buildozer
       run: |
@@ -37,6 +38,7 @@ jobs:
     - name: Build APK
       run: |
         export ANDROID_HOME=$PWD/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
         buildozer android debug
 
     - name: Upload APK
