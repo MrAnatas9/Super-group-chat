@@ -1,4 +1,4 @@
-name: Build MrAnatas9 REAL App
+name: Build MrAnatas9 App
 on: [push]
 
 jobs:
@@ -7,44 +7,30 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install ONLY what's needed
+    - name: Prepare project for online build
       run: |
-        sudo apt update
-        sudo apt install -y python3 python3-pip openjdk-11-jdk
+        # Создаем архив с проектом для онлайн-сборки
+        zip -r mr-anatas9-project.zip . -x ".git/*" ".github/*"
+        echo "✅ Project prepared for online build"
         
-    - name: Use system Python for Kivy
+    - name: Upload to build service
       run: |
-        # Собираем минимальное приложение без Android SDK
-        python3 -c "
-import os
-os.makedirs('build/android', exist_ok=True)
-with open('build/android/MrAnatas9_app.txt', 'w') as f:
-    f.write('MrAnatas9 Secret Group - Built from scratch\\n')
-print('Minimal app structure created')
-        "
+        # Здесь будет вызов API онлайн-сервиса сборки
+        echo "Project would be sent to:"
+        echo "- buildozer.com"
+        echo "- gitlab.com (имеет встроенный Android SDK)"
+        echo "- specialist CI services"
         
-    - name: Create basic APK structure
+    - name: Create instruction file
       run: |
-        mkdir -p apk_build
-        cd apk_build
-        # Минимальная структура APK
-        echo '<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.mranatas9.realapp">
-    <application android:label="MrAnatas9 Real App">
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>' > AndroidManifest.xml
+        echo "Инструкция по онлайн-сборке:" > build-instructions.txt
+        echo "1. Зайди на buildozer.com" >> build-instructions.txt
+        echo "2. Загрузи mr-anatas9-project.zip" >> build-instructions.txt
+        echo "3. Дождись сборки APK" >> build-instructions.txt
+        echo "4. Скачай готовый APK" >> build-instructions.txt
         
-        zip -r ../mr-anatas9-REAL.apk .
-        
-    - name: Upload REAL APK
+    - name: Upload project archive
       uses: actions/upload-artifact@v4
       with:
-        name: mr-anatas9-real-app
-        path: mr-anatas9-REAL.apk
+        name: mr-anatas9-project
+        path: mr-anatas9-project.zip
